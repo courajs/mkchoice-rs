@@ -1,0 +1,8 @@
+[package]
+name = "mkchoice"
+version = "0.1.0"
+authors = ["Aaron Sikes <aaron@sikes.io>"]
+edition = "2018"
+
+[dependencies]
+termion = "1.5.2"
