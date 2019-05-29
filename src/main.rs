@@ -16,7 +16,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let msg = format!("{}hello...\n\n", cursor::Up(2));
         tty.write_all(msg.as_bytes())?;
 
-        let o = Options {choices: vec!["one", "two"], position: 0};
+        let o = Options {choices: vec!["one", "two"], position: 1};
         let s = o.print();
         tty.write_all(s.as_bytes())?;
 
@@ -30,10 +30,18 @@ struct Options<'a> {
 
 impl<'a> Options<'a> {
     fn print(&self) -> String {
-
-        let mut options = self.choices.join("\n");
-        options.insert_str(0,"Choose one: \n");
-        return options
+        let mut result = String::new();
+        for (i, choice) in self.choices.iter().enumerate() {
+            if i == self.position {
+                result.push_str("> ");
+            } else {
+                result.push_str("  ");
+            }
+            result.push_str(choice);
+            result.push('\n');
+        }
+        result.insert_str(0,"Choose one: \n");
+        return result
     }
 }
 
