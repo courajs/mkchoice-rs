@@ -1,5 +1,5 @@
 use termion;
-use termion::{clear, cursor};
+use termion::{color, cursor};
 use std::error::Error;
 use std::io::Write;
 
@@ -16,7 +16,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let msg = format!("{}hello...\n\n", cursor::Up(2));
         tty.write_all(msg.as_bytes())?;
 
-        let o = Options {choices: vec!["one", "two"], position: 1};
+        let o = Options {choices: vec!["one", "two"], position: 0};
         let s = o.print();
         tty.write_all(s.as_bytes())?;
 
@@ -33,12 +33,12 @@ impl<'a> Options<'a> {
         let mut result = String::new();
         for (i, choice) in self.choices.iter().enumerate() {
             if i == self.position {
-                result.push_str("> ");
+                result.push_str(&format!("{}> ", color::Fg(color::Green)));
             } else {
                 result.push_str("  ");
             }
             result.push_str(choice);
-            result.push('\n');
+            result.push_str(&format!("{}\n", color::Fg(color::Reset)));
         }
         result.insert_str(0,"Choose one: \n");
         return result
