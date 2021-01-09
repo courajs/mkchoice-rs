@@ -10,6 +10,7 @@ use termion::{
 };
 use std::error::Error;
 use std::io::Write;
+use std::fmt::Write as _;
 use unicode_width::UnicodeWidthStr;
 
 
@@ -21,7 +22,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let c = Chooser::new(&["a", "b", "c"]);
     let v = c.present();
 
-    dbg!(v);
+    // dbg!(v);
 
     Ok(())
 }
@@ -31,11 +32,11 @@ enum MkchoiceError {
     Other(Box<dyn Error>),
 }
 
-struct Chooser<'a, T: AsRef<str>, P: AsRef<str>> {
-    vanish: bool,
-    prompt: P,
-    choices: &'a [T],
-    current_choice: usize,
+pub struct Chooser<'a, T: AsRef<str>, P: AsRef<str>> {
+    pub vanish: bool,
+    pub prompt: P,
+    pub choices: &'a [T],
+    pub current_choice: usize,
 }
 impl<T: AsRef<str>> Chooser<'_, T, String> {
     pub fn new<'a>(options: &'a [T]) -> Chooser<'a, T, String> {
@@ -46,33 +47,30 @@ impl<T: AsRef<str>> Chooser<'_, T, String> {
             current_choice: 0,
         }
     }
-
 }
 impl<T: AsRef<str>, P: AsRef<str>> Chooser<'_, T, P> {
-    pub fn present(mut self) -> Option<usize>  {
-        let mut write = termion::get_tty().unwrap();
+    pub fn present(mut self) -> Result<Option<usize>, std::io::Error>  {
+        let mut write = termion::get_tty()?;
         write!(write, "\r{}\n", self.prompt.as_ref());
 
-        let mut write = write.into_raw_mode().unwrap();
-        let read = write.try_clone().unwrap();
+        let mut write = write.into_raw_mode()?;
+        let read = write.try_clone()?;
 
-        self.print_choices(&mut write);
+        write!(write, "{}", self.choice_str());
 
         let mut result = None;
         for e in read.keys() {
-            match e.unwrap() {
+            match e? {
                 Key::Up | Key::Char('k') => {
                     if self.current_choice > 0 {
-                        write!(write, "\r{}", cursor::Up(self.choices.len() as u16));
                         self.current_choice -= 1;
-                        self.print_choices(&mut write);
+                        write!(write, "\r{}{}", cursor::Up(self.choices.len() as u16), self.choice_str());
                     }
                 },
                 Key::Down | Key::Char('j') => {
                     if self.current_choice < self.choices.len()-1 {
-                        write!(write, "\r{}", cursor::Up(self.choices.len() as u16));
                         self.current_choice += 1;
-                        self.print_choices(&mut write);
+                        write!(write, "\r{}{}", cursor::Up(self.choices.len() as u16), self.choice_str());
                     }
                 },
                 Key::Char(' ') | Key::Char('\n') => {
@@ -85,28 +83,30 @@ impl<T: AsRef<str>, P: AsRef<str>> Chooser<'_, T, P> {
         }
 
         if self.vanish {
-            write!(write, "\r{}{}", cursor::Up(self.height()), termion::clear::AfterCursor);
+            write!(write, "\r{}{}", cursor::Up(self.height()?), termion::clear::AfterCursor);
         }
-        return result;
+        return Ok(result);
     }
 
-    fn height(&self) -> u16 {
-        let (t_width,_) = termion::terminal_size().unwrap();
+    fn height(&self) -> Result<u16, std::io::Error> {
+        let (t_width,_) = termion::terminal_size()?;
         let mut n = 0;
         for s in self.prompt.as_ref().lines() {
             n += 1 + (s.width() as u16 / t_width);
         }
-        n + self.choices.len() as u16
+        Ok(n + self.choices.len() as u16)
     }
 
-    fn print_choices(&mut self, tty: &mut impl Write) {
+    fn choice_str(&self) -> String {
+        let mut s = String::new();
         for (i, choice) in self.choices.iter().enumerate() {
             if i == self.current_choice {
-                write!(tty, "{}> {}{}\r\n", color::Fg(color::Green), choice.as_ref(), color::Fg(color::Reset));
+                write!(s, "{}> {}{}\r\n", color::Fg(color::Green), choice.as_ref(), color::Fg(color::Reset));
             } else {
-                write!(tty, "  {}\r\n", choice.as_ref());
+                write!(s, "  {}\r\n", choice.as_ref());
             }
         }
+        s
     }
 }
 
