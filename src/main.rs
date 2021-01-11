@@ -19,7 +19,9 @@ use unicode_width::UnicodeWidthStr;
 // make a hardcoded State and use print() in main
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let c = Chooser::new(&["a", "b", "c"]);
+    let c = Chooser::new(&["a",
+                         "blahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblah",
+                         "c"]);
     let v = c.present();
 
     // dbg!(v);
@@ -64,20 +66,20 @@ impl<T: AsRef<str>, P: AsRef<str>> Chooser<'_, T, P> {
                 Key::Up | Key::Char('k') => {
                     if self.current_choice > 0 {
                         self.current_choice -= 1;
-                        write!(write, "\r{}{}", cursor::Up(self.choices.len() as u16), self.choice_str());
+                        write!(write, "\r{}{}", cursor::Up(self.choice_height()?), self.choice_str());
                     }
                 },
                 Key::Down | Key::Char('j') => {
                     if self.current_choice < self.choices.len()-1 {
                         self.current_choice += 1;
-                        write!(write, "\r{}{}", cursor::Up(self.choices.len() as u16), self.choice_str());
+                        write!(write, "\r{}{}", cursor::Up(self.choice_height()?), self.choice_str());
                     }
                 },
                 Key::Char(' ') | Key::Char('\n') => {
                     result = Some(self.current_choice);
                     break;
                 },
-                Key::Esc | Key::Ctrl('c') => break,
+                Key::Esc | Key::Char('q') | Key::Ctrl('c') => break,
                 _ => (),
             }
         }
@@ -86,15 +88,6 @@ impl<T: AsRef<str>, P: AsRef<str>> Chooser<'_, T, P> {
             write!(write, "\r{}{}", cursor::Up(self.height()?), termion::clear::AfterCursor);
         }
         return Ok(result);
-    }
-
-    fn height(&self) -> Result<u16, std::io::Error> {
-        let (t_width,_) = termion::terminal_size()?;
-        let mut n = 0;
-        for s in self.prompt.as_ref().lines() {
-            n += 1 + (s.width() as u16 / t_width);
-        }
-        Ok(n + self.choices.len() as u16)
     }
 
     fn choice_str(&self) -> String {
@@ -108,29 +101,28 @@ impl<T: AsRef<str>, P: AsRef<str>> Chooser<'_, T, P> {
         }
         s
     }
-}
 
-struct Options<'a> {
-    choices: Vec<&'a str>,
-    position: usize
-}
-
-impl<'a> Options<'a> {
-    fn print(&self) -> String {
-        let mut result = String::new();
-        for (i, choice) in self.choices.iter().enumerate() {
-            if i == self.position {
-                result.push_str(&format!("{}> ", color::Fg(color::Green)));
-            } else {
-                result.push_str("  ");
-            }
-            result.push_str(choice);
-            result.push_str(&format!("{}\r\n", color::Fg(color::Reset)));
-        }
-        result.insert_str(0,"Choose one: \r\n");
-        return result
+    // Total current height of the rendered text, taking into account
+    // the prompt, each option, and line wrapping at the current tty width
+    fn height(&self) -> Result<u16, std::io::Error> {
+        let (t_width,_) = termion::terminal_size()?;
+        let prompt_height = str_height(self.prompt.as_ref(), t_width);
+        let choices_height: u16 = self.choices.iter().map(|choice| str_height(choice.as_ref(), t_width)).sum();
+        Ok(prompt_height + choices_height)
+    }
+    fn choice_height(&self) -> Result<u16, std::io::Error> {
+        let (t_width,_) = termion::terminal_size()?;
+        Ok(self.choices.iter().map(|choice| str_height(choice.as_ref(), t_width)).sum())
     }
 }
+
+fn str_height(s: &str, terminal_width: u16) -> u16 {
+    s.lines().map(|line| 1 + line.width() as u16 / terminal_width).sum()
+}
+
+// fn str_height(s: &str, width: u16) -> Result<u16, std::io::Error> {
+// 
+// }
 
 // #[derive(Debug, Clone, PartialEq)]
 // struct Args {
