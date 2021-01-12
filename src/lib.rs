@@ -13,24 +13,24 @@ use std::io::Write;
 use std::fmt::Write as _;
 use unicode_width::UnicodeWidthStr;
 
-pub struct Chooser<'a, T: AsRef<str>, P: AsRef<str>> {
+pub struct Chooser {
     pub vanish: bool,
-    pub prompt: P,
-    pub choices: &'a [T],
+    pub prompt: String,
+    pub choices: Vec<String>,
     pub current_choice: usize,
 }
-impl<T: AsRef<str>> Chooser<'_, T, String> {
-    pub fn new<'a>(options: &'a [T]) -> Chooser<'a, T, String> {
+impl Chooser {
+    pub fn new(options: &[impl ToString]) -> Chooser {
         Chooser {
             vanish: true,
             prompt: String::from("Choose one:"),
-            choices: options,
+            choices: options.iter().map(|s|s.to_string()).collect(),
             current_choice: 0,
         }
     }
 }
-impl<T: AsRef<str>, P: AsRef<str>> Chooser<'_, T, P> {
-    pub fn set_choice(&mut self, val: impl PartialEq<T>) -> bool {
+impl Chooser {
+    pub fn set_choice(&mut self, val: impl PartialEq<String>) -> bool {
         for i in 0..self.choices.len() {
             if val == self.choices[i] {
                 self.current_choice = i;
@@ -41,7 +41,7 @@ impl<T: AsRef<str>, P: AsRef<str>> Chooser<'_, T, P> {
     }
     pub fn present(mut self) -> Result<Option<usize>, std::io::Error>  {
         let mut write = termion::get_tty()?;
-        write!(write, "\r{}\n", self.prompt.as_ref());
+        write!(write, "\r{}\n", self.prompt);
 
         let mut write = write.into_raw_mode()?;
         let read = write.try_clone()?;
@@ -82,9 +82,9 @@ impl<T: AsRef<str>, P: AsRef<str>> Chooser<'_, T, P> {
         let mut s = String::new();
         for (i, choice) in self.choices.iter().enumerate() {
             if i == self.current_choice {
-                write!(s, "{}> {}{}\r\n", color::Fg(color::Green), choice.as_ref(), color::Fg(color::Reset));
+                write!(s, "{}> {}{}\r\n", color::Fg(color::Green), choice, color::Fg(color::Reset));
             } else {
-                write!(s, "  {}\r\n", choice.as_ref());
+                write!(s, "  {}\r\n", choice);
             }
         }
         s

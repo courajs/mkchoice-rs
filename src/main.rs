@@ -100,17 +100,25 @@ impl Args {
 
         Ok(result)
     }
-    // fn into_chooser(self, stdin: impl Read) -> Chooser {
-    //     let mut result = Chooser {
-    //         vanish: self.vanish,
-    //         prompt: self.prompt.unwrap_or_else(||String::from("Choose one:")),
-    //         choices: self.choices,
-    //         curent_choice: 0,
-    //     };
-    //     if Some(index) = self.stdin_index {
-
-    //     }
-    // }
+    fn into_chooser(self, stdin: impl std::io::BufRead) -> std::io::Result<Chooser> {
+        let mut result = Chooser {
+            vanish: self.vanish,
+            prompt: self.prompt.unwrap_or_else(||String::from("Choose one:")),
+            choices: self.choices,
+            current_choice: 0,
+        };
+        if let Some(index) = self.stdin_index {
+            let lines = stdin.lines().collect::<std::io::Result<Vec<String>>>()?;
+            result.choices.splice(index..index, lines.into_iter());
+        }
+        if let Some(index) = self.selected_index {
+            result.current_choice = std::cmp::min(index, result.choices.len());
+        }
+        if let Some(val) = self.selection {
+            result.set_choice(val);
+        }
+        Ok(result)
+    }
 }
 
 #[cfg(test)]
