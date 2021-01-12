@@ -16,10 +16,21 @@ use unicode_width::UnicodeWidthStr;
 use mkchoice::*;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let c = Chooser::new(&["a",
-                         "blahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblah",
-                         "c"]);
-    let v = c.present();
+    let args = Args::parse(std::env::args().skip(1).collect())?;
+    let stdin = std::io::stdin();
+    let mut c = args.into_chooser(stdin.lock())?;
+        eprintln!("c");
+    let n = c.present()?;
+    if let Some((_,choice)) = n {
+        println!("{}", choice);
+        std::process::exit(0);
+    } else {
+        std::process::exit(1);
+    }
+    // let c = Chooser::new(&["a",
+    //                      "blahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblah",
+    //                      "c"]);
+    // let v = c.present();
 
     // dbg!(v);
 
