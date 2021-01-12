@@ -8,7 +8,7 @@ use termion::{
         TermRead,
     },
 };
-use std::error::Error;
+
 use std::io::Write;
 use std::fmt::Write as _;
 use unicode_width::UnicodeWidthStr;
@@ -41,15 +41,15 @@ impl Chooser {
     }
     pub fn present(mut self) -> Result<Option<(usize, String)>, std::io::Error>  {
         let mut write = termion::get_tty()?;
-        write!(write, "\r{}\n", self.prompt);
+        write!(write, "\r{}\n", self.prompt)?;
 
         eprintln!("x");
         let read = write.try_clone()?;
-        let mut raw = write.try_clone()?;
+        let raw = write.try_clone()?;
         let _raw = raw.into_raw_mode()?;
         eprintln!("y");
 
-        write!(write, "{}", self.choice_str());
+        write!(write, "{}", self.choice_str())?;
 
         let mut result = None;
         for e in read.keys() {
@@ -57,13 +57,13 @@ impl Chooser {
                 Key::Up | Key::Char('k') => {
                     if self.current_choice > 0 {
                         self.current_choice -= 1;
-                        write!(write, "\r{}{}", cursor::Up(self.choice_height()?), self.choice_str());
+                        write!(write, "\r{}{}", cursor::Up(self.choice_height()?), self.choice_str())?;
                     }
                 },
                 Key::Down | Key::Char('j') => {
                     if self.current_choice < self.choices.len()-1 {
                         self.current_choice += 1;
-                        write!(write, "\r{}{}", cursor::Up(self.choice_height()?), self.choice_str());
+                        write!(write, "\r{}{}", cursor::Up(self.choice_height()?), self.choice_str())?;
                     }
                 },
                 Key::Char(' ') | Key::Char('\n') => {
@@ -76,7 +76,7 @@ impl Chooser {
         }
 
         if self.vanish {
-            write!(write, "\r{}{}", cursor::Up(self.height()?), termion::clear::AfterCursor);
+            write!(write, "\r{}{}", cursor::Up(self.height()?), termion::clear::AfterCursor)?;
         }
         return Ok(result.map(|n| (n, self.choices.remove(n))));
     }
@@ -85,9 +85,9 @@ impl Chooser {
         let mut s = String::new();
         for (i, choice) in self.choices.iter().enumerate() {
             if i == self.current_choice {
-                write!(s, "{}> {}{}\r\n", color::Fg(color::Green), choice, color::Fg(color::Reset));
+                write!(s, "{}> {}{}\r\n", color::Fg(color::Green), choice, color::Fg(color::Reset)).unwrap();
             } else {
-                write!(s, "  {}\r\n", choice);
+                write!(s, "  {}\r\n", choice).unwrap();
             }
         }
         s

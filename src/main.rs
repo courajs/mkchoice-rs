@@ -1,24 +1,15 @@
-use termion::{
-    self,
-    raw::IntoRawMode,
-    color,
-    cursor,
-    event::Key,
-    input::{
-        TermRead,
-    },
-};
+
 use std::error::Error;
-use std::io::Write;
-use std::fmt::Write as _;
-use unicode_width::UnicodeWidthStr;
+
+
+
 
 use mkchoice::*;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse(std::env::args().skip(1).collect())?;
     let stdin = std::io::stdin();
-    let mut c = args.into_chooser(stdin.lock())?;
+    let c = args.into_chooser(stdin.lock())?;
         eprintln!("c");
     let n = c.present()?;
     if let Some((_,choice)) = n {
@@ -27,14 +18,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     } else {
         std::process::exit(1);
     }
-    // let c = Chooser::new(&["a",
-    //                      "blahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblahblah",
-    //                      "c"]);
-    // let v = c.present();
-
-    // dbg!(v);
-
-    Ok(())
 }
 
 #[derive(Debug, Clone, PartialEq)]
