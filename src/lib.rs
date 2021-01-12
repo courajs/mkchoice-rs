@@ -30,6 +30,15 @@ impl<T: AsRef<str>> Chooser<'_, T, String> {
     }
 }
 impl<T: AsRef<str>, P: AsRef<str>> Chooser<'_, T, P> {
+    pub fn set_choice(&mut self, val: impl PartialEq<T>) -> bool {
+        for i in 0..self.choices.len() {
+            if val == self.choices[i] {
+                self.current_choice = i;
+                return true;
+            }
+        }
+        return false;
+    }
     pub fn present(mut self) -> Result<Option<usize>, std::io::Error>  {
         let mut write = termion::get_tty()?;
         write!(write, "\r{}\n", self.prompt.as_ref());
