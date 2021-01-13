@@ -64,6 +64,14 @@ impl Chooser {
                         write!(write, "\r{}{}", cursor::Up(self.choice_height()?), self.choice_str())?;
                     }
                 },
+                Key::Home | Key::Char('g') => {
+                    self.current_choice = 0;
+                    write!(write, "\r{}{}", cursor::Up(self.choice_height()?), self.choice_str())?;
+                },
+                Key::End | Key::Char('G') => {
+                    self.current_choice = self.choices.len()-1;
+                    write!(write, "\r{}{}", cursor::Up(self.choice_height()?), self.choice_str())?;
+                },
                 Key::Char(' ') | Key::Char('\n') => {
                     result = Some(self.current_choice);
                     break;
