@@ -5,5 +5,10 @@ authors = ["Aaron Sikes <aaron@sikes.io>"]
 edition = "2018"
 
 [dependencies]
-termion = "1.5.2"
 unicode-width = "0.1.5"
+
+[dependencies.termion]
+# version = "1.5.5"
+# forked, because original project doesn't work in pipelines
+git = "https://github.com/courajs/termion"
+branch = "use-fds"

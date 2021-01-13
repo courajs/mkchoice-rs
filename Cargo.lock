@@ -9,7 +9,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "mkchoice"
 version = "0.1.0"
 dependencies = [
- "termion 1.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "termion 1.5.5 (git+https://github.com/courajs/termion?branch=use-fds)",
  "unicode-width 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -33,8 +33,8 @@ dependencies = [
 
 [[package]]
 name = "termion"
-version = "1.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
+version = "1.5.5"
+source = "git+https://github.com/courajs/termion?branch=use-fds#e522a7a25a9095de6638f31a99c8ce3a14fc98c4"
 dependencies = [
  "libc 0.2.55 (registry+https://github.com/rust-lang/crates.io-index)",
  "numtoa 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -52,5 +52,5 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum numtoa 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "b8f8bdf33df195859076e54ab11ee78a1b208382d3a26ec40d142ffc1ecc49ef"
 "checksum redox_syscall 0.1.54 (registry+https://github.com/rust-lang/crates.io-index)" = "12229c14a0f65c4f1cb046a3b52047cdd9da1f4b30f8a39c5063c8bae515e252"
 "checksum redox_termios 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "7e891cfe48e9100a70a3b6eb652fef28920c117d366339687bd5576160db0f76"
-"checksum termion 1.5.2 (registry+https://github.com/rust-lang/crates.io-index)" = "dde0593aeb8d47accea5392b39350015b5eccb12c0d98044d856983d89548dea"
+"checksum termion 1.5.5 (git+https://github.com/courajs/termion?branch=use-fds)" = "<none>"
 "checksum unicode-width 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)" = "9337591893a19b88d8d87f2cec1e73fad5cdfd10e5a6f349f498ad6ea2ffb1e3"

@@ -10,7 +10,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse(std::env::args().skip(1).collect())?;
     let stdin = std::io::stdin();
     let c = args.into_chooser(stdin.lock())?;
-        eprintln!("c");
     let n = c.present()?;
     if let Some((_,choice)) = n {
         println!("{}", choice);

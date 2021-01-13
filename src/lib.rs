@@ -43,11 +43,9 @@ impl Chooser {
         let mut write = termion::get_tty()?;
         write!(write, "\r{}\n", self.prompt)?;
 
-        eprintln!("x");
         let read = write.try_clone()?;
         let raw = write.try_clone()?;
         let _raw = raw.into_raw_mode()?;
-        eprintln!("y");
 
         write!(write, "{}", self.choice_str())?;
 
@@ -96,17 +94,13 @@ impl Chooser {
     // Total current height of the rendered text, taking into account
     // the prompt, each option, and line wrapping at the current tty width
     fn height(&self) -> Result<u16, std::io::Error> {
-        eprintln!("a");
         let (t_width,_) = termion::terminal_size()?;
-        eprintln!("b");
         let prompt_height = str_height(self.prompt.as_ref(), t_width);
         let choices_height: u16 = self.choices.iter().map(|choice| str_height(choice.as_ref(), t_width)).sum();
         Ok(prompt_height + choices_height)
     }
     fn choice_height(&self) -> Result<u16, std::io::Error> {
-        eprintln!("a");
         let (t_width,_) = termion::terminal_size()?;
-        eprintln!("b");
         Ok(self.choices.iter().map(|choice| str_height(choice.as_ref(), t_width)).sum())
     }
 }
