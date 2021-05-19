@@ -3,6 +3,12 @@ name = "mkchoice"
 version = "0.1.0"
 authors = ["Aaron Sikes <aaron@sikes.io>"]
 edition = "2018"
+readme = "readme.md"
+description = "A command-line tool for interactive choices"
+repository = "https://github.com/courajs/mkchoice-rs"
+license = "MIT OR Apache-2.0"
+keywords = ["cli", "tty", "terminal", "choose"]
+
 
 [dependencies]
 unicode-width = "0.1.5"
